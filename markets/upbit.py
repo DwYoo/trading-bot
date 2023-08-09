@@ -1,32 +1,31 @@
 import websockets
 import asyncio
 import json
+import time
 
 from markets.base import Market
 from utils.logger import market_logger  
-
-
 
 class UpbitKrwMarket(Market):
     def __init__(self, symbols:list, order_book_depth:int):
         self.symbols = symbols
         self.order_book_depth = order_book_depth
-        self.market_stream = {symbol: {} for symbol in symbols}
-        
-    async def stream(self):       
+        self.market_data = {symbol: {} for symbol in symbols}
+
+    async def aconnect(self):       
         message = f"Starting Upbit KRW market stream"
         market_logger.info(message)
         if len(self.symbols) < 5:
-            tasks = [self.stream_symbols(self.symbols)]
+            tasks = [self.aconnect_to_symbols(self.symbols)]
         else:
             tasks = []
             batch_size = (len(self.symbols) // 4) + 1
             for i in range(3):
-                tasks.append(self.stream_symbols(self.symbols[batch_size*i:batch_size*(i+1)]))
-            tasks.append(self.stream_symbols(self.symbols[batch_size*3:]))
+                tasks.append(self.aconnect_to_symbols(self.symbols[batch_size*i:batch_size*(i+1)]))
+            tasks.append(self.aconnect_to_symbols(self.symbols[batch_size*3:]))
         await asyncio.gather(*tasks)
 
-    async def stream_symbols(self, symbols:list[str]):
+    async def aconnect_to_symbols(self, symbols:list[str]):
         endpoint = "wss://api.upbit.com/websocket/v1"
         try:
             async with websockets.connect(endpoint) as websocket:
@@ -44,13 +43,12 @@ class UpbitKrwMarket(Market):
                 async for response in websocket:
                     raw_data = json.loads(response)
                     symbol = raw_data['cd'].replace('KRW-', '')
-                    symbol_data = self._process_data(raw_data)
-                    self.market_stream[symbol] = symbol_data
+                    self.market_data[symbol] = self._process_data(raw_data)
         except Exception as e:
             message = f"Failed to stream upbit order book : {e}. Reconnecting..."
             market_logger.error(message)
-            self.sleep()  # 잠시 대기 후 재시도
-            await self.stream_symbols(symbols)
+            await asyncio.sleep()  # 잠시 대기 후 재시도
+            await self.aconnect_to_symbols(symbols)
 
     async def _ping(self, websocket):
         while True:
@@ -60,16 +58,15 @@ class UpbitKrwMarket(Market):
     def _process_data(self, raw_data:json) -> dict:
         #업비트 웹소켓에서 받은 데이터를 변환
         symbol_data = {}
-        asks = raw_data.get('a', [])
-        bids = raw_data.get('b', [])
-        update_time = raw_data.get('E', None)
-        if asks and bids and update_time:
-            symbol_data['update_time'] = float(update_time) / 1000
+        try:
+            update_time = float(raw_data['tms'])/1000
+            symbol_data['update_time'] = update_time
             for i in range(self.order_book_depth):
-                symbol_data[f"ask_{i+1}"] = float(asks[i][0])
-                symbol_data[f"bid_{i+1}"] = float(bids[i][0])
-                symbol_data[f"ask_{i+1}_qty"] = float(asks[i][1])
-                symbol_data[f"bid_{i+1}_qty"] = float(bids[i][1])
+                obu = raw_data['obu'][i]
+                symbol_data[f"ask{i+1}"] = float(obu['ap'])
+                symbol_data[f"bid{i+1}"] = float(obu['bp'])
+                symbol_data[f"ask{i+1}_qty"] = float(obu['as'])
+                symbol_data[f"bid{i+1}_qty"] = float(obu['bs'])
             return symbol_data
-        else:
+        except Exception as e:
             return {}
