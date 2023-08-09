@@ -4,7 +4,7 @@ from pubsub import pub
 import asyncio
 
 
-class TelegramMessenger:
+class TelegramBot:
     def __init__(self, token, chat_ids):
         self.bot = Bot(token)
         self.chat_ids = chat_ids
@@ -13,7 +13,7 @@ class TelegramMessenger:
     def subscribe_to_trader(self, trader_name:str):
         pub.subscribe(self.on_trade, f"{trader_name}_trade")
 
-    async def send_telegram_message(self, text):
+    async def send_message(self, text):
         for chat_id in self.chat_ids:
             try:
                 await self.bot.send_message(chat_id, text)
@@ -21,10 +21,10 @@ class TelegramMessenger:
                 print(f"Failed to send message: {e}")
 
     def on_balance_book_data(self, message):
-        asyncio.create_task(self.send_telegram_message(message))
+        asyncio.create_task(self.send_message(message))
 
     def on_trade(self, message):
-        asyncio.create_task(self.send_telegram_message(message))
+        asyncio.create_task(self.send_message(message))
 
 
 

@@ -1,7 +1,6 @@
 import websockets
 import asyncio
 import json
-import time
 
 from markets.base import Market
 from utils.logger import market_logger  
