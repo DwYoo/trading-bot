@@ -2,18 +2,18 @@ from pydantic import BaseModel
 from typing import Optional, Literal
 
 class OrderSheet(BaseModel):
-    id : Optional[str]
+    id : Optional[float] = 0
     exchange : str
     symbol : str
     side : str
-    price : float
+    price : Optional[float] = 0
     qty : float
     order_type : Literal["limit", "market"] = 'limit'
     reduce_only : Optional[str] = False
-    created_time : Optional[float]
-    is_successful : Optional[bool]
-    order_id: Optional[str]
-    executed_time : Optional[float] 
+    created_time : Optional[float] = 0
+    is_successful : Optional[bool] = False
+    order_id: Optional[float] = 0
+    executed_time : Optional[float] = 0
 
 
     def __str__(self):
@@ -25,4 +25,4 @@ class OrderSheet(BaseModel):
                 f"qty: {self.qty}\n"
                 f"order_type: {self.order_type}\n"
                 f"reduce_only: {self.reduce_only}\n"
-                f"result: {self.result}\n")
+                f"result: {self.is_successful}\n")
