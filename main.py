@@ -48,6 +48,7 @@ async def trade_market_intime(symbol, side, qty, target_time):
         print("Printing money...")
         current_time = time.strftime("%H:%M:%S")
         if current_time == target_time:
+            time.sleep(0.1)
             await trade_market(symbol, side, qty)
             break
 
