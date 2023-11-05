@@ -2,13 +2,12 @@
 import hmac
 import time
 import hashlib
-import asyncio
 import requests
 from aiohttp import ClientSession, ClientTimeout
 
-from trade.order_sheet import OrderSheet
-from trade.base import Trader
-from utils.logger import trade_logger
+from base.OrderSheet import OrderSheet
+from base.Trader import Trader
+from utils.logging import trade_logger
 
 def fetch_symbols_and_tick_info():
     symbol_data = fetch_symbol_data()

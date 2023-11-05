@@ -2,8 +2,8 @@ import websockets
 import asyncio
 import json
 
-from markets.base import Market
-from utils.logger import market_logger  
+from base.market import Market
+from utils.logging import market_logger  
 
 class UpbitKrwMarket(Market):
     def __init__(self, symbols:list, order_book_depth:int):
@@ -12,8 +12,7 @@ class UpbitKrwMarket(Market):
         self.market_data = {symbol: {} for symbol in symbols}
 
     async def aconnect(self):       
-        message = f"Starting Upbit KRW market stream"
-        market_logger.info(message)
+        market_logger.info(f"Starting Upbit KRW market stream")
         if len(self.symbols) < 5:
             tasks = [self.aconnect_to_symbols(self.symbols)]
         else:
@@ -44,15 +43,9 @@ class UpbitKrwMarket(Market):
                     symbol = raw_data['cd'].replace('KRW-', '')
                     self.market_data[symbol] = self._process_data(raw_data)
         except Exception as e:
-            message = f"Failed to stream upbit order book : {e}. Reconnecting..."
-            market_logger.error(message)
+            market_logger.error(f"Failed to stream upbit order book : {e}. Reconnecting...")
             await asyncio.sleep()  # 잠시 대기 후 재시도
             await self.aconnect_to_symbols(symbols)
-
-    async def _ping(self, websocket):
-        while True:
-            await asyncio.sleep(1800)  # 여기서는 30분마다 ping을 보냅니다.
-            await websocket.ping()
 
     def _process_data(self, raw_data:json) -> dict:
         #업비트 웹소켓에서 받은 데이터를 변환

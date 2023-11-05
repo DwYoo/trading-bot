@@ -19,3 +19,10 @@ class Market:
             print(self.market_data)
             await asyncio.sleep(time_interval)
 
+    async def ping(self, websocket, interval:int=1800):
+        """
+        dafault: 30분마다 ping 보내기 (heartbeat)
+        """
+        while True:
+            await asyncio.sleep(1800)  
+            await websocket.ping()

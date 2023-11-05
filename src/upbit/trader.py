@@ -1,12 +1,11 @@
 import time
 import uuid
 import jwt
-import asyncio
 from aiohttp import ClientSession, ClientTimeout
 
-from trade.order_sheet import OrderSheet
-from trade.base import Trader
-from utils.logger import trade_logger
+from base.OrderSheet import OrderSheet
+from base.Trader import Trader
+from utils.logging import trade_logger
 
 class UpbitKrwTrader(Trader):
     def __init__(self, api_key:str, secret_key:str):
