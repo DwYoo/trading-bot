@@ -15,21 +15,6 @@ print(api_key, secret_key)
 
 trader = BinanceUsdmTrader(api_key, secret_key)
 
-# class OrderSheet(BaseModel):
-#     id : Optional[str]
-#     exchange : str
-#     symbol : str
-#     side : str
-#     price : Optional[float]
-#     qty : float
-#     order_type : Literal["limit", "market"] = 'limit'
-#     reduce_only : Optional[str] = False
-#     created_time : Optional[float]
-#     is_successful : Optional[bool]
-#     order_id: Optional[str]
-#     executed_time : Optional[float] 
-
-
 async def trade_market(symbol:str, side:str, qty:float):
     #symbol: BTC, side: buy or sell, qty: 0.001
     order_sheet = OrderSheet(

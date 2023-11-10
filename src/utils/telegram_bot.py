@@ -4,6 +4,7 @@ from pubsub import pub
 import asyncio
 
 
+#다 바꿀 예정
 class TelegramBot:
     def __init__(self, token, chat_ids):
         self.bot = Bot(token)
