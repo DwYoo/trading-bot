@@ -34,7 +34,10 @@ class Market:
 
     async def ping(self, websocket, interval:int=1800):
         """
-        dafault: 30분마다 ping 보내기 (heartbeat)
+        Send a ping message to the WebSocket connection at regular intervals.
+
+        :param websocket: The WebSocket connection.
+        :param interval: Interval in seconds between ping messages. (default: 30 minutes)
         """
         while True:
             await asyncio.sleep(1800)  

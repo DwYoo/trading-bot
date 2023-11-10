@@ -63,16 +63,6 @@ class UpbitKrwMarket(Market):
             await asyncio.sleep(1)  # Wait for a moment and then retry
             await self.aconnect_to_symbols(symbols)
 
-    async def _ping(self, websocket):
-        """
-        Send a ping message to the WebSocket connection at regular intervals.
-
-        :param websocket: The WebSocket connection.
-        """
-        while True:
-            await asyncio.sleep(1800)  # Send a ping message every 30 minutes.
-            await websocket.ping()
-
     def _process_data(self, raw_data: json) -> dict:
         """
         Process raw data received from the Upbit WebSocket into a structured format.

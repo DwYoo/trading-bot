@@ -33,13 +33,10 @@ class BinanceUsdmMarket(Market):
         endpoint = f"wss://fstream.binance.com/ws/{symbol.lower()}usdt@depth5@100ms"
         try:
             async with websockets.connect(endpoint) as websocket:
-<<<<<<<< HEAD:src/binance/market.py
             # Ping 메시지를 보내는 작업을 백그라운드에서 실행합니다.
                 asyncio.create_task(self.ping(websocket))
-========
                 # Run the ping message in the background.
                 asyncio.create_task(self._ping(websocket))
->>>>>>>> a1d1be5c575a3dc0f2bceadb2fc63381e87e47bb:src/markets/binance_usdm.py
                 await websocket.send(json.dumps({
                     "method": "SUBSCRIBE",
                     "params": [
@@ -55,17 +52,12 @@ class BinanceUsdmMarket(Market):
             message = f"Error while connecting to {symbol}: {e}"
             market_logger.error(message)
 
-<<<<<<<< HEAD:src/binance/market.py
     def _process_data(self, raw_data) -> dict:
         """
         웹소켓에서 받은 데이터를 변환
-========
+        """
     async def _ping(self, websocket):
-        """
-        Send a ping message to the WebSocket connection at regular intervals.
-
-        :param websocket: The WebSocket connection.
-        """
+        
         while True:
             await asyncio.sleep(1800)  # Send a ping message every 30 minutes.
             await websocket.ping()
@@ -75,7 +67,6 @@ class BinanceUsdmMarket(Market):
         Process raw data received from Binance WebSocket into a structured format.
         :param raw_data: Raw data received from the WebSocket.
         :return: Processed symbol data.
->>>>>>>> a1d1be5c575a3dc0f2bceadb2fc63381e87e47bb:src/markets/binance_usdm.py
         """
         symbol_data = {}
         asks = raw_data.get('a', [])
