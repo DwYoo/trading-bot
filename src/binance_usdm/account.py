@@ -4,7 +4,7 @@ import hashlib
 import asyncio
 from aiohttp import ClientSession, ClientTimeout
 
-from utils.logger import account_logger
+from utils.logging import account_logger
 
 class BinanceUsdmAccount:
     def __init__(self, api_key:str, secret_key:str):
@@ -35,19 +35,13 @@ class BinanceUsdmAccount:
                 return await res.json()
 
     def _set_query_string(self, params: dict) -> str:
-        query_string = '&'.join(["{}={}".format(key, params[key]) for key in params.keys()])
-        return query_string
+        return '&'.join(["{}={}".format(key, params[key]) for key in params.keys()])
     
     def _set_signature(self, query_string: dict) -> str:
-        signature = hmac.new(self.secret_key.encode(), query_string.encode(), hashlib.sha256).hexdigest()
-        return signature
+        return hmac.new(self.secret_key.encode(), query_string.encode(), hashlib.sha256).hexdigest()
 
-    def _set_headers(self):
-        headers = {
-            'X-MBX-APIKEY': self.api_key,
-        }
-        return headers
+    def _set_headers(self) -> dict[str, str]:
+        return { 'X-MBX-APIKEY': self.api_key, }
     
-    def _set_timestamp(self):
-        timestamp = int(time.time() * 1000)
-        return timestamp
+    def _set_timestamp(self) -> int:
+        return int(time.time() * 1000)

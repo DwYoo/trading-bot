@@ -1,7 +1,6 @@
-from trade.binance import BinanceUsdmTrader
-from trade.order_sheet import OrderSheet
+from binance.trader import BinanceUsdmTrader
+from base.OrderSheet import OrderSheet
 import time
-import asyncio
 import sys
 sys.path.append('../')
 from dotenv import load_dotenv

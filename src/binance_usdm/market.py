@@ -2,8 +2,8 @@ import websockets
 import asyncio
 import json
 
-from markets.base import Market
-from utils.logger import market_logger
+from base.Market import Market
+from utils.logging import market_logger
 
 class BinanceUsdmMarket(Market):
     def __init__(self, symbols: list, order_book_depth: int):
@@ -33,6 +33,8 @@ class BinanceUsdmMarket(Market):
         endpoint = f"wss://fstream.binance.com/ws/{symbol.lower()}usdt@depth5@100ms"
         try:
             async with websockets.connect(endpoint) as websocket:
+            # Ping 메시지를 보내는 작업을 백그라운드에서 실행합니다.
+                asyncio.create_task(self.ping(websocket))
                 # Run the ping message in the background.
                 asyncio.create_task(self._ping(websocket))
                 await websocket.send(json.dumps({
@@ -50,12 +52,12 @@ class BinanceUsdmMarket(Market):
             message = f"Error while connecting to {symbol}: {e}"
             market_logger.error(message)
 
+    def _process_data(self, raw_data) -> dict:
+        """
+        웹소켓에서 받은 데이터를 변환
+        """
     async def _ping(self, websocket):
-        """
-        Send a ping message to the WebSocket connection at regular intervals.
-
-        :param websocket: The WebSocket connection.
-        """
+        
         while True:
             await asyncio.sleep(1800)  # Send a ping message every 30 minutes.
             await websocket.ping()

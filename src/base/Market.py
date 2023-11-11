@@ -31,3 +31,14 @@ class Market:
         while True:
             print(self.market_data)
             await asyncio.sleep(time_interval)
+
+    async def ping(self, websocket, interval:int=1800):
+        """
+        Send a ping message to the WebSocket connection at regular intervals.
+
+        :param websocket: The WebSocket connection.
+        :param interval: Interval in seconds between ping messages. (default: 30 minutes)
+        """
+        while True:
+            await asyncio.sleep(1800)  
+            await websocket.ping()
