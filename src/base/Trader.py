@@ -1,6 +1,6 @@
 import asyncio
 from abc import abstractmethod
-from trade.order_sheet import OrderSheet
+from base.OrderSheet import OrderSheet
 
 class Trader:
     @abstractmethod

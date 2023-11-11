@@ -1,7 +1,6 @@
-from markets.binance import BinanceUsdmMarket
-from markets.upbit import UpbitKrwMarket
+from binance.market import BinanceUsdmMarket
+from upbit.market import UpbitKrwMarket
 import asyncio
-import time
 
 
 upbit_market = BinanceUsdmMarket(symbols=['BTC', 'ETH'], order_book_depth=2)    

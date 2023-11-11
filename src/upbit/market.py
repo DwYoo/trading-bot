@@ -2,8 +2,8 @@ import websockets
 import asyncio
 import json
 
-from markets.base import Market
-from utils.logger import market_logger  
+from base.market import Market
+from utils.logging import market_logger  
 
 class UpbitKrwMarket(Market):
     def __init__(self, symbols: list, order_book_depth: int):
@@ -62,16 +62,6 @@ class UpbitKrwMarket(Market):
             market_logger.error(message)
             await asyncio.sleep(1)  # Wait for a moment and then retry
             await self.aconnect_to_symbols(symbols)
-
-    async def _ping(self, websocket):
-        """
-        Send a ping message to the WebSocket connection at regular intervals.
-
-        :param websocket: The WebSocket connection.
-        """
-        while True:
-            await asyncio.sleep(1800)  # Send a ping message every 30 minutes.
-            await websocket.ping()
 
     def _process_data(self, raw_data: json) -> dict:
         """
