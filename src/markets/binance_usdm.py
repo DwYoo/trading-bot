@@ -60,7 +60,7 @@ class BinanceUsdmMarket(Market):
             await asyncio.sleep(1800)  # Send a ping message every 30 minutes.
             await websocket.ping()
 
-    def _process_data(self, raw_data:dict) -> dict:
+    def _process_data(self, raw_data:json) -> dict:
         """
         Process raw data received from Binance WebSocket into a structured format.
         :param raw_data: Raw data received from the WebSocket.
