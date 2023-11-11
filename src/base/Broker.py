@@ -2,7 +2,7 @@ import asyncio
 from abc import abstractmethod
 from base.OrderSheet import OrderSheet
 
-class Trader:
+class Broker:
     @abstractmethod
     async def aplace_order(order_sheet: OrderSheet):
         """

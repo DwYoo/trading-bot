@@ -9,10 +9,6 @@ class TelegramBot:
     def __init__(self, token, chat_ids):
         self.bot = Bot(token)
         self.chat_ids = chat_ids
-        pub.subscribe(self.on_balance_book_data, 'balance_data')
-
-    def subscribe_to_trader(self, trader_name:str):
-        pub.subscribe(self.on_trade, f"{trader_name}_trade")
 
     async def send_message(self, text):
         for chat_id in self.chat_ids:

@@ -1,4 +1,4 @@
-from binance.trader import BinanceUsdmTrader
+from binance_usdm.broker import BinanceUsdBroker
 from base.OrderSheet import OrderSheet
 import time
 import sys

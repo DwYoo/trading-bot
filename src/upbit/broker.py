@@ -4,14 +4,14 @@ import jwt
 from aiohttp import ClientSession, ClientTimeout
 
 from base.OrderSheet import OrderSheet
-from base.Trader import Trader
+from base.Broker import Broker
 from utils.logging import trade_logger
 
-# Create a Trader subclass specific to UpbitKrw
-class UpbitKrwTrader(Trader):
+# Create a Broker subclass specific to UpbitKrw
+class UpbitKrwBroker(Broker):
     def __init__(self, api_key: str, secret_key: str):
         """
-        Initialize the UpbitKrwTrader.
+        Initialize the UpbitKrwBroker.
 
         :param api_key: API key for authentication.
         :param secret_key: Secret key for authentication.
