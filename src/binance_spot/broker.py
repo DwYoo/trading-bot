@@ -99,6 +99,7 @@ class BinanceSpotBroker(Broker):
         except Exception as e:
             message = f"Error while creating order in Binance Spot: {e}"
             trade_logger.error(message)
+            return order_sheet
 
     async def acancel_order(self, order_sheet: OrderSheet):
         """
@@ -110,7 +111,7 @@ class BinanceSpotBroker(Broker):
         try:
             params = {
                 'symbol': order_sheet.symbol + 'USDT',
-                'orderId': order_sheet.order_id,
+                'orderId': order_sheet.id,
                 'recvWindow': 5000,
                 'timestamp': self._set_timestamp(),
             }
@@ -140,6 +141,7 @@ class BinanceSpotBroker(Broker):
         except Exception as e:
             message = f"Error while cancelling all open orders for {symbol}: {e}"
             trade_logger.error(message)
+        
 
     def _set_order_params(self, order_sheet: OrderSheet) -> dict:
         """
@@ -149,20 +151,32 @@ class BinanceSpotBroker(Broker):
         :return: A dictionary of order parameters.
         """
         params = {}
-        symbol, side, qty, price, order_type = order_sheet.symbol, order_sheet.side, order_sheet.qty, order_sheet.price, order_sheet.order_type
+        symbol, side, qty, qty_by_quote, price, order_type = order_sheet.symbol, order_sheet.side, order_sheet.qty, order_sheet.qty_by_quote, order_sheet.price, order_sheet.order_type
         min_qty = tick_info[symbol]['min_qty']
         tick_size = tick_info[symbol]['tick_size']
         min_qty_decimal_places = self._get_decimal_places(min_qty)
         tick_size_decimal_places = self._get_decimal_places(tick_size)
-        qty = float(format(qty, f".{min_qty_decimal_places}f"))
         price = float(format(price, f".{tick_size_decimal_places}f"))
-        params = {'symbol': symbol + 'USDT',
+        timestamp = self._set_timestamp()
+        if qty != 0:
+            qty = float(format(qty, f".{min_qty_decimal_places}f"))
+            params = {'symbol': symbol + 'USDT',
                   'side': side.upper(),
                   'type': order_type.upper(),
                   'quantity': str(qty),
                   'recvWindow': 5000,
-                  'timestamp': self._set_timestamp()
+                  'timestamp': timestamp
                   }
+        else: 
+            qty_by_quote = float(format(qty_by_quote, f".1f"))
+            params = {'symbol': symbol + 'USDT',
+                  'side': side.upper(),
+                  'type': order_type.upper(),
+                  'quoteOrderQty': str(qty_by_quote),
+                  'recvWindow': 5000,
+                  'timestamp': timestamp
+                  }
+
         if order_type == 'limit':
             params['timeInForce'] = 'GTC'
             params['price'] = str(price)

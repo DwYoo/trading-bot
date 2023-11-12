@@ -110,7 +110,7 @@ class BinanceUsdmBroker(Broker):
         try:
             params = {
                 'symbol': order_sheet.symbol + 'USDT',
-                'orderId': order_sheet.order_id,
+                'orderId': order_sheet.id,
                 'recvWindow': 5000,
                 'timestamp': self._set_timestamp(),
             }

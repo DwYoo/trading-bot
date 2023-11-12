@@ -7,7 +7,8 @@ class OrderSheet(BaseModel):
     symbol : str
     side : str
     price : Optional[float] = 0
-    qty : float
+    qty : Optional[float] = 0
+    qty_by_quote : Optional[float] = 0
     order_type : Literal["limit", "market"] = 'limit'
     reduce_only : Optional[str] = False
     timestamp : Optional[float] = 0
@@ -22,6 +23,7 @@ class OrderSheet(BaseModel):
                 f"side: {self.side}\n"
                 f"price: {self.price}\n"
                 f"qty: {self.qty}\n"
+                f"qty_by_quote: {self.qty_by_quote}\n"
                 f"order_type: {self.order_type}\n"
                 f"reduce_only: {self.reduce_only}\n"
                 f"timestamp: {self.timestamp}\n"
