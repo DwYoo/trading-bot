@@ -5,7 +5,7 @@ import requests
 from aiohttp import ClientSession, ClientTimeout
 
 from base.OrderSheet import OrderSheet
-from base.Trader import Trader
+from base.Broker import Broker
 from utils.logging import trade_logger
 
 def fetch_symbols_and_tick_info() -> tuple[list[str], dict]:
@@ -57,10 +57,10 @@ def _process_symbol_data(raw_symbol_data):
 
 all_symbols, tick_info = fetch_symbols_and_tick_info()
 
-class BinanceUsdmTrader(Trader):
+class BinanceUsdmBroker(Broker):
     def __init__(self, api_key: str, secret_key: str):
         """
-        Initialize a Binance USDM Trader with API keys.
+        Initialize a Binance USDM Broker with API keys.
 
         :param api_key: The Binance API key.
         :param secret_key: The Binance API secret key.
@@ -93,8 +93,9 @@ class BinanceUsdmTrader(Trader):
             message = f"Order placed on {time2}. Took {time2 - time1}."
             trade_logger.info(response)
             order_sheet.is_successful = True
-            order_sheet.executed_time = time2
-            order_sheet.order_id = str(response['orderId'])
+            order_sheet.timestamp = time2
+            order_sheet.exchange_order_id = str(response['orderId'])
+            return order_sheet
         except Exception as e:
             message = f"Error while creating order in Binance USDM: {e}"
             trade_logger.error(message)

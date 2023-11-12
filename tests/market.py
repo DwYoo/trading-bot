@@ -2,11 +2,8 @@ import sys
 import os
 # Get the absolute path of the current script
 current_script_path = os.path.abspath(__file__)
-print(current_script_path)
-
 # Get the absolute path of the project root by going to the parent directory and then to 'src'
 project_root_path = os.path.abspath(os.path.join(current_script_path, '..', '..', 'src'))
-print(project_root_path)
 # Add the project root path to the sys.path
 sys.path.append(project_root_path)
 from binance_usdm.market import BinanceUsdmMarket

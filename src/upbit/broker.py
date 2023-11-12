@@ -38,11 +38,13 @@ class UpbitKrwBroker(Broker):
             message = f"Order placed on {time2}. Took {time2 - time1} seconds."
             trade_logger.info(response)
             order_sheet.is_successful = True
-            order_sheet.executed_time = time2
-            order_sheet.order_id = str(response['uuid'])
+            order_sheet.timestamp = time2
+            order_sheet.exchange_order_id = str(response['uuid'])
+            return order_sheet
         except Exception as e:
             message = f"Error in creating order in Upbit Krw: {e}"
             trade_logger.error(message)
+            return order_sheet
 
     def _set_order_params(self, order_sheet: OrderSheet) -> dict:
         """
