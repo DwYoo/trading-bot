@@ -1,4 +1,4 @@
-from binance_usdm.broker import BinanceUsdBroker
+from binance_usdm.broker import BinanceUsdmBroker
 from base.OrderSheet import OrderSheet
 import time
 import sys
@@ -13,7 +13,7 @@ secret_key =  os.getenv("Binance")['secret']
 print(api_key, secret_key)
 
 
-trader = BinanceUsdmTrader(api_key, secret_key)
+trader = BinanceUsdmBroker(api_key, secret_key)
 
 async def trade_market(symbol:str, side:str, qty:float):
     #symbol: BTC, side: buy or sell, qty: 0.001

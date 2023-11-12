@@ -4,7 +4,7 @@ import hashlib
 import asyncio
 from aiohttp import ClientSession, ClientTimeout
 
-from utils.logger import account_logger
+from utils.logging import account_logger
 
 class BinanceUsdmAccount:
     def __init__(self, api_key:str, secret_key:str):
