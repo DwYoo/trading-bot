@@ -11,5 +11,5 @@ from upbit.market import UpbitKrwMarket
 import asyncio
 
 
-upbit_market = BinanceUsdmMarket(symbols=['BTC', 'ETH'], order_book_depth=2)    
+upbit_market = UpbitKrwMarket(symbols=['BTC', 'ETH'], order_book_depth=2)    
 asyncio.run(upbit_market.stream())

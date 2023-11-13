@@ -66,14 +66,6 @@ class BinanceUsdmMarket(Market):
         self.symbols = symbols
         self.order_book_depth = order_book_depth
         self.order_book = {symbol: {} for symbol in symbols}
-    
-    def get_order_book(self) -> dict:
-        """
-        Get the order book for all symbols.
-
-        :return: The order book for all symbols.
-        """
-        return self.order_book
 
     async def aconnect(self):
         """

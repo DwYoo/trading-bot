@@ -20,7 +20,7 @@ class Market:
         """
         task1 = asyncio.create_task(self.aconnect())
         await asyncio.sleep(10)
-        task2 = asyncio.create_task(self._aprint_order_book())
+        task2 = asyncio.create_task(self.aprint_data())
         await asyncio.gather(task1, task2)
 
     @abstractmethod
@@ -30,7 +30,7 @@ class Market:
         """
         pass
 
-    async def _aprint_order_book(self, time_interval: int = 5):
+    async def aprint_data(self, time_interval: int = 5):
         """
         Asynchronously print market data periodically.
 
