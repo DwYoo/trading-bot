@@ -3,7 +3,15 @@ from abc import abstractmethod
 import logging
 
 class Market:
-    market_data = {}
+    order_book = {}
+
+    def get_order_book(self) -> dict:
+        """
+        Get the order book for all symbols.
+
+        :return: The order book for all symbols.
+        """
+        return self.order_book
 
     async def stream(self):
         """
@@ -12,7 +20,7 @@ class Market:
         """
         task1 = asyncio.create_task(self.aconnect())
         await asyncio.sleep(10)
-        task2 = asyncio.create_task(self._aprint_market_data())
+        task2 = asyncio.create_task(self._aprint_order_book())
         await asyncio.gather(task1, task2)
 
     @abstractmethod
@@ -22,14 +30,14 @@ class Market:
         """
         pass
 
-    async def _aprint_market_data(self, time_interval: int = 5):
+    async def _aprint_order_book(self, time_interval: int = 5):
         """
         Asynchronously print market data periodically.
 
         :param time_interval: Time interval in seconds between prints.
         """
         while True:
-            print(self.market_data)
+            print(self.order_book)
             await asyncio.sleep(time_interval)
 
     async def ping(self, websocket, interval:int=1800):

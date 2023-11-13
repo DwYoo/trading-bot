@@ -1,9 +1,33 @@
 import websockets
 import asyncio
 import json
+import requests
+import time
 
 from base.Market import Market
 from utils.logging import market_logger  
+
+
+def fetch_symbols():
+    try: 
+        upbit_markets = fetch_markets()
+        upbit_krw_symbols = [market["market"] for market in upbit_markets if "KRW" in market["market"]]
+        upbit_krw_base_symbols = [symbol[4:] for symbol in upbit_krw_symbols]
+        market_logger.info(f"Upbit KRW symbols: {upbit_krw_base_symbols}")
+        return upbit_krw_base_symbols
+    except Exception as e:
+        message = f"Failed to fetch upbit symbols{e}"
+        market_logger.error(message)
+        time.sleep(0.5)
+        return fetch_symbols()
+    
+def fetch_markets():
+    endpoint = "https://api.upbit.com/v1/market/all"
+    response = requests.get(endpoint)
+    upbit_markets = json.loads(response.text)
+    return upbit_markets        
+
+UPBIT_SYMBOLS = fetch_symbols()
 
 class UpbitKrwMarket(Market):
     def __init__(self, symbols: list, order_book_depth: int):

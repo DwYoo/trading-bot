@@ -6,56 +6,8 @@ from aiohttp import ClientSession, ClientTimeout
 
 from base.OrderSheet import OrderSheet
 from base.Broker import Broker
+from binance_usdm.market import BINANCE_USDM_TICK_INFO
 from utils.logging import trade_logger
-
-def fetch_symbols_and_tick_info() -> tuple[list[str], dict]:
-    """
-    Fetch symbols and tick size information from the Binance API.
-
-    :return: A tuple containing the list of symbols and a dictionary of tick size information.
-    """
-    symbol_data = fetch_symbol_data()
-    return _process_symbol_data(symbol_data)
-
-def fetch_symbol_data():
-    """
-    Fetch symbol data from the Binance API.
-
-    :return: Raw symbol data from the Binance API.
-    """
-    endpoint = "https://fapi.binance.com/fapi/v1/exchangeInfo"
-    response = requests.get(endpoint)
-    symbol_data = response.json()
-    return symbol_data
-
-def _process_symbol_data(raw_symbol_data):
-    """
-    Process raw symbol data and extract symbols and tick size information.
-
-    :param raw_symbol_data: Raw symbol data from the Binance API.
-    :return: A tuple containing the list of symbols and a dictionary of tick size information.
-    """
-    tick_info = {}
-    symbols = []
-    for information in raw_symbol_data['symbols']:
-        if information["quoteAsset"] == "USDT" and information["contractType"] == "PERPETUAL":
-            symbol = information['baseAsset']
-            symbols.append(symbol)
-            filters = information['filters']
-            min_qty = None
-            tick_size = None
-            for f in filters:
-                if f['filterType'] == 'LOT_SIZE':
-                    min_qty = float(f['minQty'])
-                elif f['filterType'] == 'PRICE_FILTER':
-                    tick_size = float(f['tickSize'])
-                tick_info[symbol] = {
-                    'min_qty': min_qty,
-                    'tick_size': tick_size
-                }
-    return symbols, tick_info
-
-all_symbols, tick_info = fetch_symbols_and_tick_info()
 
 class BinanceUsdmBroker(Broker):
     def __init__(self, api_key: str, secret_key: str):
@@ -150,8 +102,8 @@ class BinanceUsdmBroker(Broker):
         """
         params = {}
         symbol, side, qty, price, order_type = order_sheet.symbol, order_sheet.side, order_sheet.qty, order_sheet.price, order_sheet.order_type
-        min_qty = tick_info[symbol]['min_qty']
-        tick_size = tick_info[symbol]['tick_size']
+        min_qty = BINANCE_USDM_TICK_INFO[symbol]['min_qty']
+        tick_size = BINANCE_USDM_TICK_INFO[symbol]['tick_size']
         min_qty_decimal_places = self._get_decimal_places(min_qty)
         tick_size_decimal_places = self._get_decimal_places(tick_size)
         qty = float(format(qty, f".{min_qty_decimal_places}f"))

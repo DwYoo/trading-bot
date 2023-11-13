@@ -1,9 +1,59 @@
 import websockets
 import asyncio
 import json
+import requests 
 
 from base.Market import Market
 from utils.logging import market_logger
+
+def fetch_symbols_and_tick_info() -> tuple[list[str], dict]:
+    """
+    Fetch symbols and tick size information from the Binance API.
+
+    :return: A tuple containing the list of symbols and a dictionary of tick size information.
+    """
+    symbol_data = fetch_symbol_data()
+    return _process_symbol_data(symbol_data)
+
+def fetch_symbol_data():
+    """
+    Fetch symbol data from the Binance API.
+
+    :return: Raw symbol data from the Binance API.
+    """
+    endpoint = "https://fapi.binance.com/fapi/v1/exchangeInfo"
+    response = requests.get(endpoint)
+    symbol_data = response.json()
+    return symbol_data
+
+def _process_symbol_data(raw_symbol_data):
+    """
+    Process raw symbol data and extract symbols and tick size information.
+
+    :param raw_symbol_data: Raw symbol data from the Binance API.
+    :return: A tuple containing the list of symbols and a dictionary of tick size information.
+    """
+    tick_info = {}
+    symbols = []
+    for information in raw_symbol_data['symbols']:
+        if information["quoteAsset"] == "USDT" and information["contractType"] == "PERPETUAL":
+            symbol = information['baseAsset']
+            symbols.append(symbol)
+            filters = information['filters']
+            min_qty = None
+            tick_size = None
+            for f in filters:
+                if f['filterType'] == 'LOT_SIZE':
+                    min_qty = float(f['minQty'])
+                elif f['filterType'] == 'PRICE_FILTER':
+                    tick_size = float(f['tickSize'])
+                tick_info[symbol] = {
+                    'min_qty': min_qty,
+                    'tick_size': tick_size
+                }
+    return symbols, tick_info
+
+BINANCE_USDM_SYMBOLS, BINANCE_USDM_TICK_INFO = fetch_symbols_and_tick_info()
 
 class BinanceUsdmMarket(Market):
     def __init__(self, symbols: list, order_book_depth: int):
@@ -15,7 +65,15 @@ class BinanceUsdmMarket(Market):
         """
         self.symbols = symbols
         self.order_book_depth = order_book_depth
-        self.market_data = {symbol: {} for symbol in symbols}
+        self.order_book = {symbol: {} for symbol in symbols}
+    
+    def get_order_book(self) -> dict:
+        """
+        Get the order book for all symbols.
+
+        :return: The order book for all symbols.
+        """
+        return self.order_book
 
     async def aconnect(self):
         """
