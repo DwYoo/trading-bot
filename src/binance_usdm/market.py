@@ -97,17 +97,12 @@ class BinanceUsdmMarket(Market):
                 async for message in websocket:
                     data = json.loads(message)
                     symbol_data = self._process_data(data)
-                    self.market_data[symbol] = symbol_data
+                    self.order_book[symbol] = symbol_data
         except Exception as e:
             message = f"Error while connecting to {symbol}: {e}"
             market_logger.error(message)
 
-    def _process_data(self, raw_data) -> dict:
-        """
-        웹소켓에서 받은 데이터를 변환
-        """
     async def _ping(self, websocket):
-        
         while True:
             await asyncio.sleep(1800)  # Send a ping message every 30 minutes.
             await websocket.ping()

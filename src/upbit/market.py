@@ -151,7 +151,6 @@ class UpbitKrwMarket(Market):
                     symbol_status =  await res.json()
             non_working_symbols = [item['currency'] for item in symbol_status if item['wallet_state'] not in ['working', 'withdraw_only'] or item['block_state'] == 'inactive']
             self.non_working_symbols = non_working_symbols
-            print(self.non_working_symbols)
             await asyncio.sleep(60)
         except Exception as e:
             message = f"Failed to fetch upbit non working symbols{e}"
