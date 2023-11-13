@@ -162,3 +162,4 @@ cython_debug/
 #Signal specifics
 src/signals
 tests/
+utils/calculator.py
