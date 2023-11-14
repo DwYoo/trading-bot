@@ -32,3 +32,11 @@ class Account:
         :return: The open position.
         """
         return self.balance['positions']
+    
+    def get_open_symbols(self) -> list:
+        """
+        Get the open symbols.
+
+        :return: The open symbols.
+        """
+        return list(self.balance['positions'].keys())

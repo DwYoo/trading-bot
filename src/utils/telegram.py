@@ -26,7 +26,7 @@ class TelegramAlert:
                 print(f"Failed to send message: {e}")
 
     def subscribe_to_singal(self, signal_name:str):
-        pub.subscribe(self._on_signal, signal_name)
+        pub.subscribe(self._on_event, signal_name)
 
     def _on_event(self, message):
         asyncio.create_task(self.send_message(message))
