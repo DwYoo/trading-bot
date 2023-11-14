@@ -38,5 +38,9 @@ def scraped_html(url):
     else:
         print(response.status_code)
 
-def time_lock(time_stamp: int, lock: int= (30+0.5) * 1000) -> bool: #ms 단위
-    return time.time()*1000 - time_stamp < lock
+def time_lock(time_stamp: int, lock: int=30, delay: int =0.5) -> bool:
+    """
+    param: 초단위
+    계산식: ms단위
+    """
+    return time.time()*1000 - time_stamp < (lock + delay) * 1000
