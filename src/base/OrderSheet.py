@@ -2,7 +2,7 @@ from pydantic import BaseModel
 from typing import Optional, Literal
 
 class OrderSheet(BaseModel):
-    id : int
+    id : Optional[int] = 0
     exchange : str
     symbol : str
     side : str

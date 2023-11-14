@@ -25,7 +25,6 @@ class BinanceUsdmAccount(Account):
         raw_account_data = await self._fetch_account_data()
         balance = self._process_raw_account_data(raw_account_data)
         self.balance = balance
-        pub.sendMessage(Events.BALANCE_UPDATED.value, message=self.balance)
         
     async def aconnect(self):
         try:
