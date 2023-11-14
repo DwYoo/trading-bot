@@ -10,7 +10,7 @@ import os
 
 
 from base.Market import Market
-from utils.logging import market_logger  
+from utils.log import market_logger  
 
 from dotenv import load_dotenv
 

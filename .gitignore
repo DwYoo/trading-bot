@@ -163,3 +163,5 @@ cython_debug/
 src/signals
 tests/
 src/utils/calculator.py
+
+# /run

@@ -4,7 +4,7 @@ import json
 import requests 
 
 from base.Market import Market
-from utils.logging import market_logger
+from utils.log import market_logger
 
 def fetch_symbols_and_tick_info() -> tuple[list[str], dict]:
     """

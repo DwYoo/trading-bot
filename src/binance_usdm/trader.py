@@ -5,7 +5,7 @@ import requests
 from aiohttp import ClientSession, ClientTimeout
 
 from base.OrderSheet import OrderSheet
-from base.Broker import Broker
+from base.Trader import Trader
 from utils.log import trade_logger
 
 def fetch_symbols_and_tick_info() -> tuple[list[str], dict]:
@@ -23,7 +23,7 @@ def fetch_symbol_data():
 
     :return: Raw symbol data from the Binance API.
     """
-    endpoint = "https://api4.binance.com/api/v3/exchangeInfo"
+    endpoint = "https://fapi.binance.com/fapi/v1/exchangeInfo"
     response = requests.get(endpoint)
     symbol_data = response.json()
     return symbol_data
@@ -38,7 +38,7 @@ def _process_symbol_data(raw_symbol_data):
     tick_info = {}
     symbols = []
     for information in raw_symbol_data['symbols']:
-        if information["quoteAsset"] == "USDT":
+        if information["quoteAsset"] == "USDT" and information["contractType"] == "PERPETUAL":
             symbol = information['baseAsset']
             symbols.append(symbol)
             filters = information['filters']
@@ -57,17 +57,17 @@ def _process_symbol_data(raw_symbol_data):
 
 all_symbols, tick_info = fetch_symbols_and_tick_info()
 
-class BinanceSpotBroker(Broker):
+class BinanceUsdmTrader(Trader):
     def __init__(self, api_key: str, secret_key: str):
         """
-        Initialize a Binance Spot Broker with API keys.
+        Initialize a Binance USDM Trader with API keys.
 
         :param api_key: The Binance API key.
         :param secret_key: The Binance API secret key.
         """
         self.api_key = api_key
         self.secret_key = secret_key
-        self.base_endpoint = "https://api4.binance.com/api/v3/order"
+        self.base_endpoint = "https://fapi.binance.com/fapi/v1/order"
 
     async def aplace_order(self, order_sheet: OrderSheet):
         """
@@ -77,7 +77,7 @@ class BinanceSpotBroker(Broker):
         """
         params = self._set_order_params(order_sheet)
         time1 = time.time()
-        trade_logger.info(f"Placing order in Binance Spot:\n" + str(order_sheet))
+        trade_logger.info(f"Placing order in Binance USDM:\n" + str(order_sheet))
         try:
             retries, max_retries = 0, 3
             response = await self._acall_api("POST", self.base_endpoint, params)
@@ -85,7 +85,7 @@ class BinanceSpotBroker(Broker):
                 retries += 1
                 response = await self._acall_api("POST", self.base_endpoint, params)
                 if retries > max_retries:
-                    message = f"Failed to place order in Binance Spot: {response}"
+                    message = f"Failed to place order in Binance USDM: {response}"
                     trade_logger.error(message)
                     order_sheet.is_successful = False
                     return False
@@ -93,13 +93,11 @@ class BinanceSpotBroker(Broker):
             message = f"Order placed on {time2}. Took {time2 - time1}."
             trade_logger.info(response)
             order_sheet.is_successful = True
-            order_sheet.timestamp = time2
-            order_sheet.exchange_order_id = str(response['orderId'])
-            return order_sheet
+            order_sheet.executed_time = time2
+            order_sheet.order_id = str(response['orderId'])
         except Exception as e:
-            message = f"Error while creating order in Binance Spot: {e}"
+            message = f"Error while creating order in Binance USDM: {e}"
             trade_logger.error(message)
-            return order_sheet
 
     async def acancel_order(self, order_sheet: OrderSheet):
         """
@@ -107,11 +105,11 @@ class BinanceSpotBroker(Broker):
 
         :param order_sheet: An instance of the OrderSheet to use for cancelling the order.
         """
-        trade_logger.info(f"Cancelling order in Binance Spot:\n" + str(order_sheet))
+        trade_logger.info(f"Cancelling order in Binance USDM:\n" + str(order_sheet))
         try:
             params = {
                 'symbol': order_sheet.symbol + 'USDT',
-                'orderId': order_sheet.id,
+                'orderId': order_sheet.order_id,
                 'recvWindow': 5000,
                 'timestamp': self._set_timestamp(),
             }
@@ -127,7 +125,7 @@ class BinanceSpotBroker(Broker):
 
         :param symbol: The symbol for which to cancel all open orders.
         """
-        trade_logger.info(f"Cancelling orders in Binance Spot for {symbol}")
+        trade_logger.info(f"Cancelling orders in Binance USDM for {symbol}")
         endpoint = f"{self.base_endpoint}/allOpenOrders"
         params = {
             'symbol': symbol + 'USDT',
@@ -141,7 +139,6 @@ class BinanceSpotBroker(Broker):
         except Exception as e:
             message = f"Error while cancelling all open orders for {symbol}: {e}"
             trade_logger.error(message)
-        
 
     def _set_order_params(self, order_sheet: OrderSheet) -> dict:
         """
@@ -151,32 +148,20 @@ class BinanceSpotBroker(Broker):
         :return: A dictionary of order parameters.
         """
         params = {}
-        symbol, side, qty, qty_by_quote, price, order_type = order_sheet.symbol, order_sheet.side, order_sheet.qty, order_sheet.qty_by_quote, order_sheet.price, order_sheet.order_type
+        symbol, side, qty, price, order_type = order_sheet.symbol, order_sheet.side, order_sheet.qty, order_sheet.price, order_sheet.order_type
         min_qty = tick_info[symbol]['min_qty']
         tick_size = tick_info[symbol]['tick_size']
         min_qty_decimal_places = self._get_decimal_places(min_qty)
         tick_size_decimal_places = self._get_decimal_places(tick_size)
+        qty = float(format(qty, f".{min_qty_decimal_places}f"))
         price = float(format(price, f".{tick_size_decimal_places}f"))
-        timestamp = self._set_timestamp()
-        if qty != 0:
-            qty = float(format(qty, f".{min_qty_decimal_places}f"))
-            params = {'symbol': symbol + 'USDT',
+        params = {'symbol': symbol + 'USDT',
                   'side': side.upper(),
                   'type': order_type.upper(),
                   'quantity': str(qty),
                   'recvWindow': 5000,
-                  'timestamp': timestamp
-                  }
-        else: 
-            qty_by_quote = float(format(qty_by_quote, f".1f"))
-            params = {'symbol': symbol + 'USDT',
-                  'side': side.upper(),
-                  'type': order_type.upper(),
-                  'quoteOrderQty': str(qty_by_quote),
-                  'recvWindow': 5000,
-                  'timestamp': timestamp
-                  }
-
+                  'timestamp': self._set_timestamp(),
+                  'reduceOnly': order_sheet.reduce_only}
         if order_type == 'limit':
             params['timeInForce'] = 'GTC'
             params['price'] = str(price)
