@@ -17,4 +17,4 @@ secret_key =  os.getenv("BINANCE_SECRET_KEY")
 account = BinanceUsdmAccount(api_key, secret_key)
 
 
-asyncio.run(account.connect_stream())
+asyncio.run(account.aconnect())

@@ -5,11 +5,11 @@ import asyncio
 
 import os
 from dotenv import load_dotenv
+
+from base.Topics import Topics
+
 load_dotenv()
-bot_token= os.getenv("TELEGRAM_BOT_TOKEN")
-
-
-bot = Bot(token='token')
+bot = Bot(token=os.getenv("TELEGRAM_BOT_TOKEN"))
 
 class TelegramAlert:
     # 특정 이벤트 발생 시 텔레그램으로 메시지 보냄
@@ -17,7 +17,7 @@ class TelegramAlert:
         self.bot = bot
         self.chat_ids = chat_ids
         # pub.subscribe(self.on_balance_book_data, 'balance_data')
-
+    
     def subscribe_to_singal(self, signal_name:str):
         pub.subscribe(self.on_signal, f"{signal_name} signal")
 

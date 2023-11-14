@@ -123,10 +123,10 @@ class UpbitKrwMarket(Market):
             symbol_data['update_time'] = update_time
             for i in range(self.order_book_depth):
                 obu = raw_data['obu'][i]
-                symbol_data[f"ask{i+1}"] = float(obu['ap'])
-                symbol_data[f"bid{i+1}"] = float(obu['bp'])
-                symbol_data[f"ask{i+1}_qty"] = float(obu['as'])
-                symbol_data[f"bid{i+1}_qty"] = float(obu['bs'])
+                symbol_data[f"ask_{i+1}"] = float(obu['ap'])
+                symbol_data[f"bid_{i+1}"] = float(obu['bp'])
+                symbol_data[f"ask_{i+1}_qty"] = float(obu['as'])
+                symbol_data[f"bid_{i+1}_qty"] = float(obu['bs'])
             return symbol_data
         except Exception as e:
             return {}
