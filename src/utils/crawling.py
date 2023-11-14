@@ -12,19 +12,19 @@ def get_binance_articles(script_data):
 
 def binance_article_parser(title: str) -> str:
     tokens = title.split()
-    if tokens[0] == "Binance" and 
+    if (tokens[0] == "Binance" and 
         tokens[1] == "Futures" and 
         tokens[2] == "Will" and 
         tokens[3] == "Launch" and 
-        tokens[4] == "USDT-Margined":
+        tokens[4] == "USDⓈ-M"):
         return tokens[5]
     else:
         return ""
 
-def announce_check(url: str) -> str:
+def announce_check(url: str, nth: int) -> str:
     script_data = scraped_html(url).find('script', {'id': '__APP_DATA'})
     if(script_data):
-        lastest_title = get_binance_articles(script_data)[0]['title']
+        lastest_title = get_binance_articles(script_data)[nth]['title']
         return binance_article_parser(lastest_title)
 
 def scraped_html(url):
