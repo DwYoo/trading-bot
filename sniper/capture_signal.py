@@ -13,7 +13,7 @@ BINANCE_URL = "https://www.binance.com/en/support/announcement/new-cryptocurrenc
 
 async def capture_signal():
     while(True):
-        signal = crawling.announce_check(BINANCE_URL, 1)
+        signal = crawling.announce_check(BINANCE_URL)
         print(signal)
         if signal:
             pass
