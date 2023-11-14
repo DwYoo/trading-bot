@@ -22,7 +22,6 @@ class UpbitAccount(Account):
             raw_account_data = await self._fetch_account_data()
             balance = self._process_raw_balance_data(raw_account_data, order_book)
             self.balance = balance
-            pub.sendMessage(Events.BALANCE_UPDATED.value, message=self.balance)
         except Exception as e:
             message = f"Failed to fetch upbit balance data: {e}"
             logger.error(message)
@@ -57,7 +56,7 @@ class UpbitAccount(Account):
                 market_price = float(raw_balance['avg_buy_price'])
         return market_price
         
-    def _process_raw_balance_data(self, raw_data:dict, order_book_data:dict) -> dict:
+    def _process_raw_balance_data(self, raw_data:dict, order_book:pd.DataFrame) -> dict:
         balance_data = {}
         total_balance = 0
         balance_data['positions'] = {}
@@ -74,7 +73,7 @@ class UpbitAccount(Account):
                         'avg_price': float(raw_balance['avg_buy_price']),
                         'qty': qty,
                     }
-                    market_price = self._get_market_price(raw_balance, order_book_data)
+                    market_price = self._get_market_price(raw_balance, order_book)
                     total_balance += qty * market_price
         balance_data['total_balance'] = total_balance
         return balance_data
