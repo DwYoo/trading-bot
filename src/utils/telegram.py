@@ -6,7 +6,7 @@ import asyncio
 import os
 from dotenv import load_dotenv
 
-from base.Topics import Topics
+from base.Events import Events
 
 load_dotenv()
 bot = Bot(token=os.getenv("TELEGRAM_BOT_TOKEN"))
@@ -16,10 +16,7 @@ class TelegramAlert:
     def __init__(self, chat_ids):
         self.bot = bot
         self.chat_ids = chat_ids
-        # pub.subscribe(self.on_balance_book_data, 'balance_data')
-    
-    def subscribe_to_singal(self, signal_name:str):
-        pub.subscribe(self.on_signal, f"{signal_name} signal")
+        pub.subscribe(self._on_balance_update, Events.BALANCE_UPDATE.value)
 
     async def send_message(self, text):
         for chat_id in self.chat_ids:
@@ -28,14 +25,16 @@ class TelegramAlert:
             except Exception as e:
                 print(f"Failed to send message: {e}")
 
-    def on_signal(self, message):
+    def subscribe_to_singal(self, signal_name:str):
+        pub.subscribe(self._on_signal, signal_name)
+
+    def _on_balance_update(self, message):
         asyncio.create_task(self.send_message(message))
 
-    # def on_balance_book_data(self, message):
-    #     asyncio.create_task(self.send_message(message))
+    def _on_signal(self, message):
+        asyncio.create_task(self.send_message(message))
 
-    # def on_trade(self, message):
-    #     asyncio.create_task(self.send_message(message))
+telegram_alert = TelegramAlert(chat_ids=[os.getenv("TELEGRAM_CHAT_ID_1")])
 
 
 

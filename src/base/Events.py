@@ -1,0 +1,6 @@
+from enum import Enum
+
+class Events(Enum):
+    ACCOUNT_EVENT_FROM_CLIENT = "ACCOUNT_EVENT_FROM_CLIENT"
+    BALANCE_UPDATE = "BALANCE_UPDATE"
+    SIGNAL = "SIGNAL"

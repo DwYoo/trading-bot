@@ -6,6 +6,7 @@ sys.path.append(project_root_path)
 
 import asyncio
 from binance_usdm.account import BinanceUsdmAccount
+from utils.telegram import telegram_alert
 
 from dotenv import load_dotenv
 
@@ -17,4 +18,4 @@ secret_key =  os.getenv("BINANCE_SECRET_KEY")
 account = BinanceUsdmAccount(api_key, secret_key)
 
 
-asyncio.run(account.aconnect())
+asyncio.run(account.alisten())

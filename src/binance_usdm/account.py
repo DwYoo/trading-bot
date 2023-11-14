@@ -7,47 +7,74 @@ import json
 from pubsub import pub
 from aiohttp import ClientSession, ClientTimeout
 
-from base.Topics import Topics
+from base.Account import Account
+from base.Events import Events
 from utils.logger import account_logger
 
-class BinanceUsdmAccount:
+class BinanceUsdmAccount(Account):
+    balance = {}
+
     def __init__(self, api_key:str, secret_key:str):
         self.api_key = api_key
         self.secret_key = secret_key
-        self.base_endpoint = "https://fapi.binance.com/fapi/v2/account"
+        self.account_endpoint = "https://fapi.binance.com/fapi/v2/account"
         self.stream_endpoint = "wss://fstream.binance.com/ws"
+        pub.subscribe(self._on_account_event_from_client, Events.ACCOUNT_EVENT_FROM_CLIENT.value)
 
-    async def aconnect(self):
+    async def aupdate_balance(self):
+        #updates balance and positions and publishes the event
+        raw_account_data = await self._fetch_account_data()
+        balance = self._process_raw_account_data(raw_account_data)
+        self.balance = balance
+        pub.sendMessage(Events.BALANCE_UPDATE.value, message=self.balance)
+        
+    async def alisten(self):
         try:
             listen_key = await self._get_listen_key()
-            print(listen_key)
             async with websockets.connect(f"{self.stream_endpoint}/{listen_key}") as websocket:
                 while True:
                     try:
                         response = await websocket.recv()
-                        pub.sendMessage(Topics.ACCOUNT_UPDATE.value, data="Account updated")
+                        pub.sendMessage(Events.ACCOUNT_EVENT_FROM_CLIENT.value, message="Account event from client")
                     except Exception as e:
                         print(f"Error in receiving message: {e}")
         except Exception as e:
             message = f"Error while connecting stream: {e}"
             account_logger.error(message)
 
-    def _process_account_update_event(self, data:dict):
-        #아직 안 씀
-        timestamp = data['T']
-        usdt_balance = data['a']['B'][0]['wb']
-        try:
-            updated_position = data['a']['P'][0]
-            self._process_position_data(updated_position)
-        except:
-            pass
+    def _on_account_event_from_client(self, message):
+        asyncio.create_task(self.aupdate_balance())
 
-    
-    def _process_position_data(self, data:dict):
-        symbol = data['s'].strip('USDT')
-        amount = data['pa']
-        entry_price = data['ep']
-        return symbol, amount, entry_price
+    async def _fetch_account_data(self):
+        try:
+            params = {
+                    'recvWindow': 5000,
+                    'timestamp': self._set_timestamp()
+                }
+            raw_account_data = await self._acall_api("GET", self.account_endpoint, params)
+            return raw_account_data
+        except Exception as e:
+            message = f"Error while fetching account data from binance: {e}"
+            account_logger.error(message)
+
+    def _process_raw_account_data(self, raw_account_data:dict) -> dict:
+        account_data = {}
+        account_data['available_balance'] = float(raw_account_data['availableBalance'])
+        account_data['total_balance'] = float(raw_account_data['totalWalletBalance'])
+        account_data['positions'] = self._process_positions(raw_account_data)
+        return account_data
+
+    def _process_positions(self, raw_account_data) -> dict:
+        #Get positions from raw_account_data
+        positions = {}
+        for position in raw_account_data['positions']:
+            if 'USDT' in position['symbol'] and abs(float(position['notional'])) > 1:
+                symbol = position['symbol'].replace('USDT', '')
+                positions[symbol] = {
+                    'avg_price': float(position['entryPrice']),
+                    'qty': float(position['positionAmt']),
+                }
+        return positions
 
     async def _get_listen_key(self):
         try:
