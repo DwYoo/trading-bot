@@ -1,6 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
 import json
+import time
 
 
 def get_binance_articles(script_data):
@@ -21,11 +22,14 @@ def binance_article_parser(title: str) -> str:
     else:
         return ""
 
-def announce_check(url: str, nth: int) -> str:
+def announce_check(url: str, nth: int=0) -> str:
     script_data = scraped_html(url).find('script', {'id': '__APP_DATA'})
     if(script_data):
-        lastest_title = get_binance_articles(script_data)[nth]['title']
-        return binance_article_parser(lastest_title)
+        article = get_binance_articles(script_data)[0]
+        lastest_title = article['title']
+        time_stamp = article['releaseDate']
+        if(time_lock(time_stamp)):
+            return binance_article_parser(lastest_title)
 
 def scraped_html(url):
     response = requests.get(url)
@@ -34,4 +38,5 @@ def scraped_html(url):
     else:
         print(response.status_code)
 
-
+def time_lock(time_stamp: int, lock: int= (30+0.5) * 1000) -> bool: #ms 단위
+    return time.time()*1000 - time_stamp < lock
