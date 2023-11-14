@@ -12,7 +12,6 @@ from base.Events import Events
 from utils.logger import account_logger
 
 class BinanceUsdmAccount(Account):
-    balance = {}
 
     def __init__(self, api_key:str, secret_key:str):
         self.api_key = api_key
@@ -26,9 +25,9 @@ class BinanceUsdmAccount(Account):
         raw_account_data = await self._fetch_account_data()
         balance = self._process_raw_account_data(raw_account_data)
         self.balance = balance
-        pub.sendMessage(Events.BALANCE_UPDATE.value, message=self.balance)
+        pub.sendMessage(Events.BALANCE_UPDATED.value, message=self.balance)
         
-    async def alisten(self):
+    async def aconnect(self):
         try:
             listen_key = await self._get_listen_key()
             async with websockets.connect(f"{self.stream_endpoint}/{listen_key}") as websocket:

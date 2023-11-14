@@ -1,6 +1,6 @@
 import aiohttp
 import asyncio
-from utils.log import market_logger
+from utils.logger import market_logger
 
 class FxMarket:
     def __init__(self):

@@ -16,8 +16,8 @@ class TelegramAlert:
     def __init__(self, chat_ids):
         self.bot = bot
         self.chat_ids = chat_ids
-        pub.subscribe(self._on_balance_update, Events.BALANCE_UPDATE.value)
-
+        pub.subscribe(self._on_event, Events.BALANCE_UPDATED.value)
+        pub.subscribe(self._on_event, Events.ORDER_CREATED.value)
     async def send_message(self, text):
         for chat_id in self.chat_ids:
             try:
@@ -28,10 +28,7 @@ class TelegramAlert:
     def subscribe_to_singal(self, signal_name:str):
         pub.subscribe(self._on_signal, signal_name)
 
-    def _on_balance_update(self, message):
-        asyncio.create_task(self.send_message(message))
-
-    def _on_signal(self, message):
+    def _on_event(self, message):
         asyncio.create_task(self.send_message(message))
 
 telegram_alert = TelegramAlert(chat_ids=[os.getenv("TELEGRAM_CHAT_ID_1")])
