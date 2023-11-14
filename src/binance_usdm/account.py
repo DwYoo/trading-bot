@@ -2,8 +2,12 @@ import hmac
 import time
 import hashlib
 import asyncio
+import websockets
+import json
+from pubsub import pub
 from aiohttp import ClientSession, ClientTimeout
 
+from base.Topics import Topics
 from utils.log import account_logger
 
 class BinanceUsdmAccount:
@@ -11,19 +15,52 @@ class BinanceUsdmAccount:
         self.api_key = api_key
         self.secret_key = secret_key
         self.base_endpoint = "https://fapi.binance.com/fapi/v2/account"
-        self.stream_endpoint = "wss://fstream.binance.com/ws/"
+        self.stream_endpoint = "wss://fstream.binance.com/ws"
 
-    async def connect_stream(self):
+    async def aconnect(self):
         try:
-            response = await self._acall_api("POST", self.stream_endpoint, {})
-            return response['listenKey']
+            listen_key = await self._get_listen_key()
+            print(listen_key)
+            async with websockets.connect(f"{self.stream_endpoint}/{listen_key}") as websocket:
+                while True:
+                    try:
+                        response = await websocket.recv()
+                        pub.sendMessage(Topics.ACCOUNT_UPDATE.value, data="Account updated")
+                    except Exception as e:
+                        print(f"Error in receiving message: {e}")
         except Exception as e:
             message = f"Error while connecting stream: {e}"
             account_logger.error(message)
 
+    def _process_account_update_event(self, data:dict):
+        #아직 안 씀
+        timestamp = data['T']
+        usdt_balance = data['a']['B'][0]['wb']
+        try:
+            updated_position = data['a']['P'][0]
+            self._process_position_data(updated_position)
+        except:
+            pass
+
+    
+    def _process_position_data(self, data:dict):
+        symbol = data['s'].strip('USDT')
+        amount = data['pa']
+        entry_price = data['ep']
+        return symbol, amount, entry_price
+
     async def _get_listen_key(self):
-        response = await self._acall_api("POST", f"https://fapi.binance.com/fapi/v1/listenKey")
-        return response['listenKey']
+        try:
+            params = {
+                'recvWindow': 5000,
+                'timestamp': self._set_timestamp()
+            }
+            response = await self._acall_api("POST", f"https://fapi.binance.com/fapi/v1/listenKey", params)
+            return response['listenKey']
+
+        except Exception as e:
+            message = f"Error while getting listen key: {e}"
+            account_logger.error(message)
 
     async def _acall_api(self, method:str, endpoint:str, params:dict):
         query_string = self._set_query_string(params)
