@@ -5,7 +5,7 @@ from aiohttp import ClientSession, ClientTimeout
 
 from base.OrderSheet import OrderSheet
 from base.Broker import Broker
-from utils.log import trade_logger
+from utils.logger import trade_logger
 
 # Create a Broker subclass specific to UpbitKrw
 class UpbitKrwBroker(Broker):

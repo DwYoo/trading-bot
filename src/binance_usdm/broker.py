@@ -7,7 +7,7 @@ from aiohttp import ClientSession, ClientTimeout
 from base.OrderSheet import OrderSheet
 from base.Broker import Broker
 from binance_usdm.market import BINANCE_USDM_TICK_INFO
-from utils.log import trade_logger
+from utils.logger import trade_logger
 
 class BinanceUsdmBroker(Broker):
     def __init__(self, api_key: str, secret_key: str):

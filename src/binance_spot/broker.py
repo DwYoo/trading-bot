@@ -6,7 +6,7 @@ from aiohttp import ClientSession, ClientTimeout
 
 from base.OrderSheet import OrderSheet
 from base.Broker import Broker
-from utils.log import trade_logger
+from utils.logger import trade_logger
 
 def fetch_symbols_and_tick_info() -> tuple[list[str], dict]:
     """

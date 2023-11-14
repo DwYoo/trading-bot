@@ -1,5 +1,5 @@
 import time
-import utils.log as logging
+import utils.logger as logging
 
 class TimeStamp:
     def __init__():
