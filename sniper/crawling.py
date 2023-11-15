@@ -23,6 +23,7 @@ def binance_article_parser(title: str) -> str:
         return ""
 
 def announce_check(url: str, nth: int=0) -> str:
+    #Checks if there is a new listing announcement. If there is, return the token name.
     script_data = scraped_html(url).find('script', {'id': '__APP_DATA'})
     if(script_data):
         article = get_binance_articles(script_data)[0]
@@ -30,6 +31,8 @@ def announce_check(url: str, nth: int=0) -> str:
         time_stamp = article['releaseDate']
         if(time_lock(time_stamp)):
             return binance_article_parser(lastest_title)
+        else: 
+            return ""
 
 def scraped_html(url):
     response = requests.get(url)
@@ -38,7 +41,7 @@ def scraped_html(url):
     else:
         print(response.status_code)
 
-def time_lock(time_stamp: int, lock: int=30, delay: int =0.5) -> bool:
+def time_lock(time_stamp: int, lock: int=10, delay: int =0.5) -> bool:
     """
     param: 초단위
     계산식: ms단위
