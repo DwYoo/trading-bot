@@ -21,10 +21,15 @@ class BinanceUsdmAccount(Account):
         pub.subscribe(self._on_account_event_from_client, Events.ACCOUNT_EVENT_FROM_CLIENT.value)
 
     async def aupdate_balance(self):
-        #updates balance and positions and publishes the event
-        raw_account_data = await self._fetch_account_data()
-        balance = self._process_raw_account_data(raw_account_data)
-        self.balance = balance
+        try: 
+            #updates balance and positions and publishes the event
+            raw_account_data = await self._fetch_account_data()
+            balance = self._process_raw_account_data(raw_account_data)
+            self.balance = balance
+            account_logger.info(f"Binance USDM balance updated: {self.balance}")
+        except Exception as e:
+            message = f"Error while updating Binance USDM balance: {e}"
+            account_logger.error(message)
         
     async def aconnect(self):
         try:
