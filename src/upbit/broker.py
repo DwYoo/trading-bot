@@ -36,6 +36,7 @@ class UpbitKrwBroker(Broker):
             response = await self._acall_api("POST", self.base_endpoint, query_string, headers, data=params)
             time2 = time.time()
             message = f"Order placed on {time2}. Took {time2 - time1} seconds."
+            trade_logger.info(message)
             trade_logger.info(response)
             order_sheet.is_successful = True
             order_sheet.timestamp = time2
@@ -45,6 +46,52 @@ class UpbitKrwBroker(Broker):
             message = f"Error in creating order in Upbit Krw: {e}"
             trade_logger.error(message)
             return order_sheet
+
+    async def acancel_order_by_id(self, order_id:str) -> dict:
+        query_string = f'uuid={order_id}'
+        headers = self._set_headers(query_string)
+        try:
+            response = await self._acall_api("DELETE",  "https://api.upbit.com/v1/order", query_string, headers)
+            message = f"Order cancelled for {order_id} : {response}"
+            trade_logger.info(message)
+            trade_logger.info(response)
+            return response
+        except Exception as e:
+            message = f"Error while cancelling order: {e}"
+            trade_logger.error(message)
+            
+    async def acancel_order_by_symbol(self, symbol) -> list:
+        #특정 심볼에 대한 미체결 주문 취소
+        responses = []
+        orders = await self.afetch_open_orders_by_symbol(symbol)
+        if orders != [] and orders != None:
+            for order in orders:
+                response = await self.acancel_order_by_id(order['uuid'])
+                responses.append(response)
+        trade_logger.info(f"Orders cancelled for {symbol}")
+        trade_logger.info(responses)
+        return responses
+    
+    async def afetch_open_orders_by_symbol(self, symbol:str) -> list:
+        #특정 심볼에 대한 미체결 주문 조회
+        params = {
+            'market': 'KRW-'+symbol,  # 주문을 조회하려는 마켓 아이디
+            'state': 'wait',  # 미체결 주문
+        }
+        query_string = self._set_query_string(params)
+        headers = self._set_headers(query_string)
+        try:
+            response = await self._acall_api("GET", self.base_endpoint, query_string, headers)
+            orders = []
+            for order in response:
+                orders.append(order)
+            message = f"Order fetched for {symbol}: {response}"
+            trade_logger.info(message)
+            trade_logger.info(orders)
+            return orders
+        except Exception as e:
+            message = f"Error in fetching order: {e}"
+            trade_logger.error(message)
 
     def _set_order_params(self, order_sheet: OrderSheet) -> dict:
         """

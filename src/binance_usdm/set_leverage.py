@@ -15,6 +15,6 @@ binance.load_markets()  # load markets to get the market id from a unified symbo
 print(binance.markets)
 for market in binance.markets.values():
     binance.set_leverage(
-        leverage=2, 
+        leverage=3, 
         symbol=market['id'],  # convert a unified CCXT symbol to an exchange-specific market id
 )
