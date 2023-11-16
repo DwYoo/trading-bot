@@ -13,7 +13,7 @@ from utils import logger, telegram
 BINANCE_URL = "https://www.binance.com/en/support/announcement/new-cryptocurrency-listing?c=48&navId=48"
 CRWALING_INTERVAL = 10
 
-telegram.telegram_alert.subscribe_to_singal(SNIPING_EVENTS.SIGNAL_DETECTED.value)
+telegram.sniper_alert.subscribe_to_singal(SNIPING_EVENTS.SIGNAL_DETECTED.value)
 
 async def capture_signal():
     while(True):
