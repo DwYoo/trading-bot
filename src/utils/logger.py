@@ -29,7 +29,7 @@ def get_logger(name):
     
     # Return the configured logger.
     return logger
-
+    
 # Create loggers for different components or purposes.
 market_logger = get_logger('market')
 trade_logger = get_logger('trade')
