@@ -62,7 +62,7 @@ class BinanceUsdmAccount(Account):
     def _process_raw_account_data(self, raw_account_data:dict) -> dict:
         account_data = {}
         account_data['available_balance'] = float(raw_account_data['availableBalance'])
-        account_data['total_balance'] = float(raw_account_data['totalWalletBalance'])
+        account_data['total_balance'] = float(raw_account_data['totalWalletBalance']) + float(raw_account_data['totalUnrealizedProfit'])
         account_data['positions'] = self._process_positions(raw_account_data)
         return account_data
 
