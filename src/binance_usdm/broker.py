@@ -79,7 +79,7 @@ class BinanceUsdmBroker(Broker):
         :param symbol: The symbol for which to cancel all open orders.
         """
         trade_logger.info(f"Cancelling orders in Binance USDM for {symbol}")
-        endpoint = f"{self.base_endpoint}/allOpenOrders"
+        endpoint = "https://fapi.binance.com/fapi/v1/allOpenOrders"
         params = {
             'symbol': symbol + 'USDT',
             'recvWindow': 5000,

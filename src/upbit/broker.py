@@ -20,13 +20,15 @@ class UpbitKrwBroker(Broker):
         self.secret_key = secret_key
         self.base_endpoint = "https://api.upbit.com/v1/orders"
 
-    async def aplace_order(self, order_sheet: OrderSheet):
+    async def aplace_order(self, order_sheet: OrderSheet) -> OrderSheet:
         """
         Place an order using the provided OrderSheet.
 
         :param order_sheet: An instance of the OrderSheet to use for placing the order.
         """
         # Create and send an order request
+        # Params: OrderSheet
+        # Returns: OrderSheet
         time1 = time.time()
         params = self._set_order_params(order_sheet)
         query_string = self._set_query_string(params)
