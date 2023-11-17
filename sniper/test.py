@@ -15,5 +15,7 @@ def test_scrap():
     script_data = BinanceListingChecker.get_script_data(soup)
     first_article = BinanceListingChecker.get_first_article(script_data)
     print(first_article)
+    relesae_timestamp = first_article['releaseDate']
+    print(time.time() - relesae_timestamp/1000)
 
 test_scrap()

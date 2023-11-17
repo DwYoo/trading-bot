@@ -49,7 +49,7 @@ class BinanceListingChecker:
     @staticmethod
     def is_new_announcement(release_timestamp: int, threshold_time:float=30) -> bool:
         #Checks if there is a new listing announcement. If there is, return the token name.
-        if (time.time()*1000 - release_timestamp) < threshold_time:
+        if (time.time() - release_timestamp/1000) < threshold_time:
             return True
         else:
             return False
