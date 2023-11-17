@@ -1,19 +1,15 @@
 import websockets
 import asyncio
 import json
-import requests
-import time
-import uuid
-import jwt
+from pybithumb import Bithumb
 from aiohttp import ClientSession, ClientTimeout
 
 from base.Market import Market
 from utils.logger import market_logger  
 
-def fetch_symbols():
-    pass
     
-BITHUMB_SYMBOLS = fetch_symbols()
+BITHUMB_SYMBOLS = Bithumb.get_tickers()
+print(BITHUMB_SYMBOLS)
 
 class BithumbKrwMarket(Market):
     non_working_symbols = []
@@ -58,7 +54,10 @@ class BithumbKrwMarket(Market):
         endpoint = "wss://pubwss.bithumb.com/pub/ws"
         try:
             
-            async with websockets.connect(endpoint) as websocket:
+            async with websockets.connect(endpoint, ping_interval=None) as websocket:
+                connect_message = await websocket.recv()
+                if "Connected Successfully" not in connect_message :
+                    market_logger.log("connection error for bithumb")
                 subscribe_data = json.dumps(
                     {
                         "type": "orderbooksnapshot",
@@ -66,9 +65,9 @@ class BithumbKrwMarket(Market):
                     },
                 )
                 await websocket.send(subscribe_data)
+                msg = await websocket.recv()
                 async for response in websocket:
                     json_response = json.loads(response)
-                    print(json_response)
                     raw_data = json_response['content']
                     symbol = raw_data['symbol'].replace('_KRW', '')
                     self.order_book[symbol] = self._process_data(raw_data)
