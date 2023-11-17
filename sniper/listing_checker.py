@@ -20,6 +20,7 @@ class BinanceListingChecker:
                 return BinanceListingChecker.get_listing_symbol(lastest_title)
             
         except Exception as e:
+            print(f"Error while checking binance announcement: {e}")
             signal_logger.error(f"Error while checking binance announcement: {e}")
             return ""
 
