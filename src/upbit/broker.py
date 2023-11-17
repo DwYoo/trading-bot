@@ -37,12 +37,10 @@ class UpbitKrwBroker(Broker):
         try:
             response = await self._acall_api("POST", self.base_endpoint, query_string, headers, data=params)
             time2 = time.time()
-            message = f"Order placed on {time2}. Took {time2 - time1} seconds."
-            trade_logger.info(message)
-            trade_logger.info(response)
             order_sheet.is_successful = True
-            order_sheet.timestamp = time2
             order_sheet.exchange_order_id = str(response['uuid'])
+            order_sheet.timestamp = time2
+            order_sheet.time_took = time2 - time1
             return order_sheet
         except Exception as e:
             message = f"Error in creating order in Upbit Krw: {e}"

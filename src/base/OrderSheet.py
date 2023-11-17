@@ -14,6 +14,7 @@ class OrderSheet(BaseModel):
     timestamp : Optional[float] = 0
     is_successful : Optional[bool] = False
     exchange_order_id: Optional[float] = 0
+    time_took : Optional[float] = 0
 
 
     def __str__(self):
@@ -26,6 +27,7 @@ class OrderSheet(BaseModel):
                 f"qty_by_quote: {self.qty_by_quote}\n"
                 f"order_type: {self.order_type}\n"
                 f"reduce_only: {self.reduce_only}\n"
-                f"timestamp: {self.timestamp}\n"
-                f"result: {self.is_successful}\n"
-                f"exchange_order_id: {self.exchange_order_id}\n")
+                f"is_successful: {self.is_successful}\n"
+                f"exchange_order_id: {self.exchange_order_id}\n"
+                f"response_at: {self.timestamp}\n"
+                f"time_took: {self.time_took:.3f}s\n")

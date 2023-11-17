@@ -42,10 +42,9 @@ class BinanceUsdmBroker(Broker):
                     order_sheet.is_successful = False
                     return False
             time2 = time.time()
-            message = f"Order placed on {time2}. Took {time2 - time1}."
-            trade_logger.info(response)
             order_sheet.is_successful = True
             order_sheet.timestamp = time2
+            order_sheet.time_took = time2 - time1
             order_sheet.exchange_order_id = str(response['orderId'])
             return order_sheet
         except Exception as e:

@@ -49,7 +49,7 @@ class UpbitAccount(Account):
         if symbol == 'KRW':
             market_price = 1
         else:
-            try: market_price = order_book.loc[symbol]['bid1']
+            try: market_price = order_book.loc[symbol]['bid_1']
             except Exception as e: 
                 message = f"Failed to fetch market price for {symbol}: {e}"
                 logger.error(message)
