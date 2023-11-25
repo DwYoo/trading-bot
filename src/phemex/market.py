@@ -8,7 +8,7 @@ from utils.logger import market_logger
 
 def fetch_symbols_and_tick_info() -> tuple[list[str], dict]:
     """
-    Fetch symbols and tick size information from the Binance API.
+    Fetch symbols and tick size information from the Phemex API.
 
     :return: A tuple containing the list of symbols and a dictionary of tick size information.
     """
@@ -17,48 +17,39 @@ def fetch_symbols_and_tick_info() -> tuple[list[str], dict]:
 
 def fetch_symbol_data():
     """
-    Fetch symbol data from the Binance API.
+    Fetch symbol data from the Phemex API.
 
-    :return: Raw symbol data from the Binance API.
+    :return: Raw symbol data from the Phemex API.
     """
-    endpoint = "https://fapi.binance.com/fapi/v1/exchangeInfo"
+    endpoint = "https://api.phemex.com/public/products"
     response = requests.get(endpoint)
-    symbol_data = response.json()
-    return symbol_data
+    symbol_data_list = response.json()['data']['products']
+    futures = [symbol_data for symbol_data in symbol_data_list if symbol_data['type'] == 'Perpetual']
+    return futures
 
 def _process_symbol_data(raw_symbol_data):
     """
     Process raw symbol data and extract symbols and tick size information.
 
-    :param raw_symbol_data: Raw symbol data from the Binance API.
+    :param raw_symbol_data: Raw symbol data from the Phemex API.
     :return: A tuple containing the list of symbols and a dictionary of tick size information.
     """
     tick_info = {}
     symbols = []
-    for information in raw_symbol_data['symbols']:
-        if information["quoteAsset"] == "USDT" and information["contractType"] == "PERPETUAL":
-            symbol = information['baseAsset']
+    for information in raw_symbol_data['symbol']:
+        if information["quoteCurrency"] == "USD":
+            symbol = information['symbol'].replace('USD', '')
             symbols.append(symbol)
-            filters = information['filters']
-            min_qty = None
-            tick_size = None
-            for f in filters:
-                if f['filterType'] == 'LOT_SIZE':
-                    min_qty = float(f['minQty'])
-                elif f['filterType'] == 'PRICE_FILTER':
-                    tick_size = float(f['tickSize'])
-                tick_info[symbol] = {
-                    'min_qty': min_qty,
-                    'tick_size': tick_size
-                }
+            tick_size = information['tickSize']
+            tick_info[symbol] = {'tick_size': tick_size}
     return symbols, tick_info
 
-BINANCE_USDM_SYMBOLS, BINANCE_USDM_TICK_INFO = fetch_symbols_and_tick_info()
+Phemex_Perpetual_SYMBOLS, Phemex_Perpetual_TICK_INFO = fetch_symbols_and_tick_info()
 
-class BinanceUsdmMarket(Market):
+class PhemexPerpetualMarket(Market):
     def __init__(self, symbols: list, order_book_depth: int):
         """
-        Initialize a Binance USDM Market instance.
+        Initialize a Phemex Perpetual Market instance.
 
         :param symbols: List of symbols to track.
         :param order_book_depth: Depth of the order book to track.
@@ -69,29 +60,28 @@ class BinanceUsdmMarket(Market):
 
     async def aconnect(self):
         """
-        Connect to the Binance USDM market and start streaming data for multiple symbols.
+        Connect to the Phemex Perpetual market and start streaming data for multiple symbols.
         """
-        market_logger.info("Starting Binance USDM market stream")
+        market_logger.info("Starting Phemex Perpetual market stream")
         await asyncio.gather(*[self.aconnect_to_symbol(symbol) for symbol in self.symbols])
 
     async def aconnect_to_symbol(self, symbol: str):
         """
-        Connect to a specific symbol on the Binance USDM market and stream its data.
+        Connect to a specific symbol on the Phemex Perpetual market and stream its data.
 
         :param symbol: The symbol to connect to.
         """
-        endpoint = f"wss://fstream.binance.com/ws/{symbol.lower()}usdt@depth5@100ms"
+        endpoint = f"wss://ws.phemex.com"
         try:
             async with websockets.connect(endpoint) as websocket:
-            # Ping 메시지를 보내는 작업을 백그라운드에서 실행합니다.
+                # Ping 메시지를 보내는 작업을 백그라운드에서 실행합니다.
                 asyncio.create_task(self._ping(websocket))
-                # Run the ping message in the background.
                 await websocket.send(json.dumps({
-                    "method": "SUBSCRIBE",
+                    "id": 0,
+                    "method": "orderbook.subscribe",
                     "params": [
-                        f"{symbol.upper()}USDT@depth5@100ms"
-                    ],
-                    "id": 1
+                        symbol.upper() + 'USD'
+                    ]
                 }))
                 async for message in websocket:
                     data = json.loads(message)
@@ -103,12 +93,12 @@ class BinanceUsdmMarket(Market):
 
     async def _ping(self, websocket):
         while True:
-            await asyncio.sleep(1800)  # Send a ping message every 30 minutes.
+            await asyncio.sleep(5)  # Send a ping message every 30 minutes.
             await websocket.ping()
 
     def _process_data(self, raw_data:json) -> dict:
         """
-        Process raw data received from Binance WebSocket into a structured format.
+        Process raw data received from Phemex WebSocket into a structured format.
         :param raw_data: Raw data received from the WebSocket.
         :return: Processed symbol data.
         """

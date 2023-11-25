@@ -21,7 +21,7 @@ class BinanceUsdmBroker(Broker):
         self.secret_key = secret_key
         self.base_endpoint = "https://fapi.binance.com/fapi/v1/order"
 
-    async def aplace_order(self, order_sheet: OrderSheet):
+    async def aplace_order(self, order_sheet: OrderSheet) -> OrderSheet:
         """
         Place an order using the provided OrderSheet.
 
@@ -42,6 +42,7 @@ class BinanceUsdmBroker(Broker):
                     order_sheet.is_successful = False
                     return False
             time2 = time.time()
+            trade_logger.info(response)
             order_sheet.is_successful = True
             order_sheet.timestamp = time2
             order_sheet.time_took = time2 - time1
