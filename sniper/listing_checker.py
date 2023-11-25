@@ -13,14 +13,14 @@ class BinanceListingChecker:
         """
         try: 
             script_data = BinanceListingChecker.scrap(url).find('script', {'id': '__APP_DATA'})
-            first_article = BinanceListingChecker.get_first_article(script_data)
-            lastest_title = first_article['title']
-            article_release_timestamp = first_article['releaseDate']
+            latest_article = BinanceListingChecker.get_latest_article(script_data)
+            lastest_title = latest_article['title']
+            article_release_timestamp = latest_article['releaseDate']
+            signal_logger.info(f"Latest announcement: {lastest_title}")
             if BinanceListingChecker.is_new_announcement(article_release_timestamp):
                 return BinanceListingChecker.get_listing_symbol(lastest_title)
             
         except Exception as e:
-            print(f"Error while checking binance announcement: {e}")
             signal_logger.error(f"Error while checking binance announcement: {e}")
             return ""
 
@@ -37,8 +37,9 @@ class BinanceListingChecker:
         return soup.find('script', {'id': '__APP_DATA'})
     
     @staticmethod
-    def get_first_article(script_data):
-        return BinanceListingChecker.get_articles(script_data)[0]
+    def get_latest_article(script_data):
+        latest_article = BinanceListingChecker.get_articles(script_data)[0]
+        return latest_article
 
     @staticmethod
     def get_articles(script_data):
