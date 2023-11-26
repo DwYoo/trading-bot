@@ -16,6 +16,7 @@ class BinanceListingChecker:
             latest_article = BinanceListingChecker.get_latest_article(script_data)
             lastest_title = latest_article['title']
             article_release_timestamp = latest_article['releaseDate']
+            print(article_release_timestamp)
             signal_logger.info(f"Latest announcement: {lastest_title}")
             if BinanceListingChecker.is_new_announcement(article_release_timestamp):
                 return BinanceListingChecker.get_listing_symbol(lastest_title)
@@ -52,6 +53,7 @@ class BinanceListingChecker:
     def is_new_announcement(release_timestamp: int, threshold_time:float=30) -> bool:
         #Checks if there is a new listing announcement. If there is, return the token name.
         if (time.time() - release_timestamp/1000) < threshold_time:
+            print(time.time() - release_timestamp/1000)
             return True
         else:
             return False

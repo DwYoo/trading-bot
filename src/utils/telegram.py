@@ -32,7 +32,7 @@ class TelegramAlert:
         asyncio.create_task(self.send_message(message))
 
 dongbot_alert = TelegramAlert(dong_bot, chat_ids=[os.getenv("TELEGRAM_CHAT_ID_1")])
-sniper_alert = TelegramAlert(sniper_bot, chat_ids=[os.getenv("TELEGRAM_CHAT_ID_1")])
+sniper_alert = TelegramAlert(sniper_bot, chat_ids=[os.getenv("TELEGRAM_CHAT_ID_1"), os.getenv("TELEGRAM_CHAT_ID_2")])
 
 
 

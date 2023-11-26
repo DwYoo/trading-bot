@@ -13,7 +13,7 @@ def test_scrap():
     url = "https://www.binance.com/en/support/announcement/new-cryptocurrency-listing?c=48&navId=48"
     soup = BinanceListingChecker.scrap(url)
     script_data = BinanceListingChecker.get_script_data(soup)
-    first_article = BinanceListingChecker.get_first_article(script_data)
+    first_article = BinanceListingChecker.get_latest_article(script_data)
     print(first_article)
     relesae_timestamp = first_article['releaseDate']
     print(time.time() - relesae_timestamp/1000)
