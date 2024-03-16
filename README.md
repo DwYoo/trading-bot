@@ -1,2 +1,2 @@
-# CEX_TRADING_BOT
-CEX_TRADING_BOT
+# Crypto_Trading_bot
+High Frequency Crypto Trading Bot Framework for cross CEX strategies 
